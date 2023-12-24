@@ -18,16 +18,16 @@ const navLinks = [
         active: route().current("dashboard"),
     },
     {
+        name: "Role",
+        icon: ArrowRightLeft,
+        link: route("roles.index"),
+        active: route().current("roles.index"),
+    },
+    {
         name: "Users",
         icon: User2,
         link: route("users.index"),
         active: route().current("users.index"),
-    },
-    {
-        name: "Category",
-        icon: ArrowRightLeft,
-        link: "",
-        active: "",
     },
     {
         name: "Transactions",
@@ -77,7 +77,7 @@ export default function NavigationBar(params) {
             </div>
             <div className="mt-10 flex flex-col space-y-8">
                 {navLinks.map((item, index) => (
-                    <Link href={item.link} active={item.active}>
+                    <Link href={item.link} active={item.active} key={index}>
                         <div
                             key={index}
                             className={

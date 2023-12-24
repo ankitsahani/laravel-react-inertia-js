@@ -3,15 +3,14 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 
 export default function Edit({ auth }) {
-    const { user } = usePage().props;
+    const { user, role } = usePage().props;
 
     const { data, setData, put, errors } = useForm({
-        name: user.name || "",
-        email: user.email || "",
+        name: role.name || "",
     });
     function handleSubmit(e) {
         e.preventDefault();
-        put(route("user.update", user.id), data);
+        put(route("role.update", role.id), data);
     }
 
     return (
@@ -19,11 +18,11 @@ export default function Edit({ auth }) {
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    User Edit
+                    Role Edit
                 </h2>
             }
         >
-            <Head title="Users" />
+            <Head title="Role Edit" />
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -54,29 +53,7 @@ export default function Edit({ auth }) {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="mb-6">
-                                    <label
-                                        for="email"
-                                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                    >
-                                        Email address
-                                    </label>
-                                    <input
-                                        onChange={(e) =>
-                                            setData("email", e.target.value)
-                                        }
-                                        type="email"
-                                        id="email"
-                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                                        placeholder="john.doe@company.com"
-                                        label="email"
-                                        name="email"
-                                        value={data.email}
-                                    />
-                                    <span className="text-red-600">
-                                        {errors.email}
-                                    </span>
-                                </div>
+                                
                                 <div className="mb-6">
                                     <button
                                         type="submit"
@@ -86,7 +63,7 @@ export default function Edit({ auth }) {
                                     </button>
                                     <Link
                                         className="ml-2 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-3 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-                                        href={route("users.index")}
+                                        href={route("roles.index")}
                                     >
                                         Back
                                     </Link>

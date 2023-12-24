@@ -49,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Deleted successfully...!');
+        return redirect('/')->with('success', 'Logout successfully...!');
     }
 }

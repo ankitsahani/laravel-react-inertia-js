@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -13,9 +11,17 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(10);
+        $search = $request->input('search');
+        $perpage = $request->input('perpage') ?? 10;
+        $users = User::query()
+        ->when($search, function ($query, $search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                ->OrWhere('email', 'like', '%' . $search . '%');
+        })
+        ->where('role_id',2)
+        ->latest()->paginate($perpage);
         return Inertia::render('User/Index', array('users' => $users));
     }
     /**
@@ -57,7 +63,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         User::find($id)->delete();
-        return Redirect::to('/users');
+        return Redirect::to('/users')->with('success', 'User deleted successfully..!');
     }
     /**
      * Write code on Method

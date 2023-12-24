@@ -1,5 +1,5 @@
-
-export default function DashboardNew(params) {
+export default function DashboardNew(totalUsers) { 
+    console.log(totalUsers)   
     return (
         <div className="container px-6 mx-auto grid">
             <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
@@ -18,10 +18,10 @@ export default function DashboardNew(params) {
                     </div>
                     <div>
                         <p className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                            Total clients
+                            Total users
                         </p>
                         <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                            6389
+                            {totalUsers?.totalUsers || 0}
                         </p>
                     </div>
                 </div>

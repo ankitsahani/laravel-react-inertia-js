@@ -1,7 +1,10 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import DashboardNew from "@/Components/Dashboard";
+import { usePage } from "@inertiajs/react";
+
 export default function Dashboard({ auth }) {
+    const {totalUsers} = usePage().props;
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -13,7 +16,7 @@ export default function Dashboard({ auth }) {
         >
             <Head title="Dashboard" />
 
-            <DashboardNew></DashboardNew>
+            <DashboardNew totalUsers={totalUsers}></DashboardNew>
         </AuthenticatedLayout>
     );
 }

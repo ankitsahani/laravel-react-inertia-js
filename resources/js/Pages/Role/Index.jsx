@@ -9,22 +9,22 @@ import { useEffect, useRef, useState } from "react";
 import TextInput from "@/Components/TextInput";
 
 export default function Index({ auth }) {
-    const { users } = usePage().props;
+    const { roles } = usePage().props;
     const perpage = useRef(10);
     const willDelete = useRef();
 
-    const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
+    const [confirmingRoleDeletion, setConfirmingRoleDeletion] = useState(false);
     const [query, setQuery] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const { delete: destroy, processing, reset } = useForm();
-    const confirmUserDeletion = (id) => {
+    const confirmRoleDeletion = (id) => {
         willDelete.current = id;
-        setConfirmingUserDeletion(true);
+        setConfirmingRoleDeletion(true);
     };
 
-    const deleteUser = (e) => {
+    const deleteRole = (e) => {
         e.preventDefault();
-        destroy(route("user.destroy", willDelete.current), {
+        destroy(route("role.destroy", willDelete.current), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
             onError: () => "",
@@ -33,13 +33,13 @@ export default function Index({ auth }) {
     };
 
     const closeModal = () => {
-        setConfirmingUserDeletion(false);
+        setConfirmingRoleDeletion(false);
         reset();
     };
     const handleSearch = async () => {
         setIsLoading(true);
         await router.get(
-            route("users.index"),
+            route("roles.index"),
             {
                 search: query,
                 perpage: perpage.current,
@@ -70,11 +70,11 @@ export default function Index({ auth }) {
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Users
+                    Roles
                 </h2>
             }
         >
-            <Head title="Users" />
+            <Head title="Roles" />
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -152,17 +152,17 @@ export default function Index({ auth }) {
                             <div className="flex items-center flex-1 space-x-4">
                                 <h5>
                                     <span className="text-gray-500">
-                                        All Users:
+                                        All Roles:
                                     </span>
                                     <span className="dark:text-white">
-                                        {users.total}
+                                        {roles.total}
                                     </span>
                                 </h5>
                             </div>
                             <div className="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3">
                                 <Link
                                     type="button"
-                                    href={route("user.create")}
+                                    href={route("role.create")}
                                     className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-gray-950 hover:bg-gray-1000 focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-950 focus:outline-none dark:focus:ring-gray-800"
                                 >
                                     <svg
@@ -178,7 +178,7 @@ export default function Index({ auth }) {
                                             d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                                         />
                                     </svg>
-                                    Add new user
+                                    Add new role
                                 </Link>
 
                                 <button
@@ -214,9 +214,6 @@ export default function Index({ auth }) {
                                         Name
                                     </th>
                                     <th scope="col" className="px-6 py-3">
-                                        Email
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
                                         Created At
                                     </th>
                                     <th scope="col" className="px-6 py-3">
@@ -230,25 +227,22 @@ export default function Index({ auth }) {
                                         <td>Loading....</td>
                                     </tr>
                                 ) : (
-                                    users.data.map((user, index) => (
+                                    roles.data.map((role, index) => (
                                         <tr
-                                            key={user.id}
+                                            key={role.id}
                                             className="bg-white border-b dark:bg-gray-800 dark:border-gray-950"
                                         >
                                             <td className="px-6 py-3">
-                                                {index + users.from}
+                                                {index + roles.from}
                                             </td>
                                             <th
                                                 scope="row"
                                                 className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                             >
-                                                {user.name}
+                                                {role.name}
                                             </th>
                                             <td className="px-6 py-3">
-                                                {user.email}
-                                            </td>
-                                            <td className="px-6 py-3">
-                                                {moment(user.created_at).format(
+                                                {moment(role.created_at).format(
                                                     "YYYY/MM/DD hh:mm:ss a"
                                                 )}
                                             </td>
@@ -256,16 +250,16 @@ export default function Index({ auth }) {
                                                 <Link
                                                     className="px-6 py-2 font-bold text-white bg-gray-950 rounded mx-3"
                                                     href={route(
-                                                        "user.edit",
-                                                        user.id
+                                                        "role.edit",
+                                                        role.id
                                                     )}
                                                 >
                                                     Edit
                                                 </Link>
                                                 <DangerButton
                                                     onClick={() =>
-                                                        confirmUserDeletion(
-                                                            user.id
+                                                        confirmRoleDeletion(
+                                                            role.id
                                                         )
                                                     }
                                                 >
@@ -277,14 +271,14 @@ export default function Index({ auth }) {
                                 )}
                             </tbody>
                         </table>
-                        <Pagination className="mt-6" links={users} />
+                        <Pagination className="mt-6" links={roles} />
                     </div>
                 </div>
             </div>
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
+            <Modal show={confirmingRoleDeletion} onClose={closeModal}>
+                <form onSubmit={deleteRole} className="p-6">
                     <h2 className="text-lg font-medium text-gray-950">
-                        Are you sure you want to delete your account?
+                        Are you sure you want to delete this role?
                     </h2>
                     <div className="mt-6 flex justify-end">
                         <SecondaryButton onClick={closeModal}>
