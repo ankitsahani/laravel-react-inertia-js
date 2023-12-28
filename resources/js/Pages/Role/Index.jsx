@@ -5,12 +5,12 @@ import SecondaryButton from "@/Components/SecondaryButton";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Link, Head, usePage, useForm, router } from "@inertiajs/react";
 import moment from "moment/moment";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import TextInput from "@/Components/TextInput";
 
 export default function Index({ auth }) {
     const { roles } = usePage().props;
-    const perpage = useRef(10);
+    const perpage = useRef();
     const willDelete = useRef();
 
     const [confirmingRoleDeletion, setConfirmingRoleDeletion] = useState(false);
@@ -36,13 +36,13 @@ export default function Index({ auth }) {
         setConfirmingRoleDeletion(false);
         reset();
     };
-    const handleSearch = async () => {
+    const handleSearch = async (query, perpage) => {
         setIsLoading(true);
         await router.get(
             route("roles.index"),
             {
                 search: query,
-                perpage: perpage.current,
+                perpage: perpage,
             },
             {
                 preserveScroll: true,
@@ -54,16 +54,10 @@ export default function Index({ auth }) {
     const handleReset = () => {
         setQuery("");
     };
-    /*search record*/
-    useEffect(() => {
-        handleSearch();
-        const debounceTimeout = setTimeout(handleSearch, 300);
-        return () => clearTimeout(debounceTimeout);
-    }, [query]);
     /*Handle PerPage change*/
     const handlePerPageChange = (e) => {
         perpage.current = e.target.value;
-        handleSearch();
+        handleSearch(query, e.target.value);
     };
     return (
         <AuthenticatedLayout
@@ -76,8 +70,11 @@ export default function Index({ auth }) {
         >
             <Head title="Roles" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div className="container px-6 mx-auto grid">
+                <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Roles
+                </h2>
+                <div className="my-0 font-semibold text-gray-700 dark:text-gray-200">
                     <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                         <div className="flex flex-col px-4 py-3 space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4">
                             <div className="w-full md:w-1/2">
@@ -102,13 +99,13 @@ export default function Index({ auth }) {
                                                 aria-hidden="true"
                                                 className="w-5 h-5 text-gray-500 dark:text-gray-400"
                                                 fill="currentColor"
-                                                viewbox="0 0 20 20"
+                                                viewBox="0 0 20 20"
                                                 xmlns="http://www.w3.org/2000/svg"
                                             >
                                                 <path
-                                                    fill-rule="evenodd"
+                                                    fillRule="evenodd"
                                                     d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                                    clip-rule="evenodd"
+                                                    clipRule="evenodd"
                                                 />
                                             </svg>
                                         </div>
@@ -121,9 +118,10 @@ export default function Index({ auth }) {
                                             autoComplete="false"
                                             required=""
                                             value={query}
-                                            onChange={(e) =>
-                                                setQuery(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                                setQuery(e.target.value);
+                                                handleSearch(e.target.value, perpage.current);
+                                            }}
                                         />
                                     </div>
                                     <div className="w-20">
@@ -135,13 +133,13 @@ export default function Index({ auth }) {
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
-                                                stroke-width="1.5"
+                                                strokeWidth="1.5"
                                                 stroke="currentColor"
                                                 className="w-6 h-6"
                                             >
                                                 <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
                                                     d="M6 18 18 6M6 6l12 12"
                                                 />
                                             </svg>
@@ -168,13 +166,13 @@ export default function Index({ auth }) {
                                     <svg
                                         className="h-3.5 w-3.5 mr-2"
                                         fill="currentColor"
-                                        viewbox="0 0 20 20"
+                                        viewBox="0 0 20 20"
                                         xmlns="http://www.w3.org/2000/svg"
                                         aria-hidden="true"
                                     >
                                         <path
-                                            clip-rule="evenodd"
-                                            fill-rule="evenodd"
+                                            clipRule="evenodd"
+                                            fillRule="evenodd"
                                             d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                                         />
                                     </svg>
@@ -189,14 +187,14 @@ export default function Index({ auth }) {
                                         className="w-4 h-4 mr-2"
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
-                                        viewbox="0 0 24 24"
-                                        stroke-width="2"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="2"
                                         stroke="currentColor"
                                         aria-hidden="true"
                                     >
                                         <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
                                             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                                         />
                                     </svg>
@@ -285,7 +283,12 @@ export default function Index({ auth }) {
                             Cancel
                         </SecondaryButton>
 
-                        <DangerButton className="ms-3" preserveScroll preserveState disabled={processing}>
+                        <DangerButton
+                            className="ms-3"
+                            preserveScroll
+                            preserveState
+                            disabled={processing}
+                        >
                             Delete Account
                         </DangerButton>
                     </div>

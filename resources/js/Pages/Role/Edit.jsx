@@ -3,8 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 
 export default function Edit({ auth }) {
-    const { user, role } = usePage().props;
-
+    const {role} = usePage().props;
     const { data, setData, put, errors } = useForm({
         name: role.name || "",
     });
@@ -24,15 +23,18 @@ export default function Edit({ auth }) {
         >
             <Head title="Role Edit" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div className="container px-6 mx-auto grid">
+                <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Roles
+                </h2>
+                <div className="my-0 font-semibold text-gray-700 dark:text-gray-200">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
                             <form name="createForm" onSubmit={handleSubmit}>
                                 <div className="mb-6">
                                     <div>
                                         <label
-                                            for="name"
+                                            htmlFor="name"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Name
@@ -46,7 +48,7 @@ export default function Edit({ auth }) {
                                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                                             placeholder="John"
                                             name="name"
-                                            value={data.name}
+                                            value={role.name}
                                         />
                                         <span className="text-red-600">
                                             {errors.name}

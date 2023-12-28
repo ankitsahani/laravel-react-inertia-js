@@ -1,11 +1,9 @@
 import React from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Link, Head, usePage, useForm } from "@inertiajs/react";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 export default function Create({ auth }) {
-    const { user } = usePage().props;
-    const { data, setData, put, errors, flash } = useForm({
+    const { data, setData, put, errors } = useForm({
         name: "",
         email: "",
     });
@@ -24,9 +22,11 @@ export default function Create({ auth }) {
             }
         >
             <Head title="Roles" />
-            <ToastContainer />
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div className="container px-6 mx-auto grid">
+                <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Roles
+                </h2>
+                <div className="my-0 font-semibold text-gray-700 dark:text-gray-200">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
                             <form name="createForm" onSubmit={handleSubmit}>

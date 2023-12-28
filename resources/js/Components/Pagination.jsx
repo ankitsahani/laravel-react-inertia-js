@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
+import nFormatter from "@/utils/helper";
 
 export default function Pagination({ links }) {
     function getClassName(active) {
@@ -12,7 +13,7 @@ export default function Pagination({ links }) {
     return (
         <div className="flex items-center justify-between">
             <div className="pt-6">
-                Showing {links.from} to {links.to} of {links.total} entries
+                Showing {nFormatter(links.from)} to {nFormatter(links.to)} of {nFormatter(links.total)} entries
             </div>
             <div className="flex items-center gap-2">
                 {links.links.length > 3 && (

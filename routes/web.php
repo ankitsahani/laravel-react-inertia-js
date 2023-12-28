@@ -29,19 +29,20 @@ Route::get('/', function () {
 })->name('login');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-->middleware(['auth', 'verified'])->name('dashboard');
+    ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profiles', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/user-create', [UserController::class, 'create'])->name('user.create');
-    Route::put('/user-store', [UserController::class, 'store'])->name('user.store');
+    Route::post('/user-store', [UserController::class, 'store'])->name('user.store');
     Route::get('/users-edit/{id}', [UserController::class, 'edit'])->name('user.edit');
-    Route::put('/users-update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::post('/users-update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/delete-users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::get('/user-export', [UserController::class, 'exportData'])->name('users.export');
 
     Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
     Route::get('/role-create', [RoleController::class, 'create'])->name('role.create');

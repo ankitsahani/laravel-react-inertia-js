@@ -64,9 +64,9 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        $user = Role::find($id);
+        $role = Role::find($id);
         return Inertia::render('Role/Edit', [
-            'user' => $user
+            'role' => $role
         ]);
     }
 
