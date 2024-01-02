@@ -1,18 +1,31 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
+import Select from "react-select";
 
 export default function Edit({ auth }) {
-    const { user } = usePage().props;
-
+    const { user, rolesArr } = usePage().props;
+    const options =
+        user?.roles &&
+        user?.roles?.map((role) => {
+            return { label: role.name, value: role.name };
+        });
+    console.log(options);
     const { data, setData, post, errors } = useForm({
         name: user.name || "",
         email: user.email || "",
         pic: "",
+        roles: options || [],
     });
-    console.log(data);
+    // Function triggered on selection
+    function handleSelect(data) {
+        setData("roles", data);
+    }
+
     const [file, setFile] = useState(
-        user.pic ? "http://localhost:8000/storage/users/" + user.pic : "http://localhost:8000/default.png"
+        user.pic
+            ? "http://localhost:8000/storage/users/" + user.pic
+            : "http://localhost:8000/default.png"
     );
     function handleChange(e) {
         setFile(URL.createObjectURL(e.target.files[0]));
@@ -26,6 +39,7 @@ export default function Edit({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
+            permissions={auth.permissions}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
                     User Edit
@@ -46,6 +60,25 @@ export default function Edit({ auth }) {
                                 onSubmit={handleSubmit}
                                 encType="multipart/form-data"
                             >
+                                <div className="mb-0">
+                                    <label
+                                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                        htmlFor="roles"
+                                    >
+                                        Roles
+                                    </label>
+                                    <div className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
+                                        <Select
+                                            options={rolesArr}
+                                            placeholder="Select roles"
+                                            defaultValue={options}
+                                            onChange={handleSelect}
+                                            isMulti
+                                            isSearchable={true}
+                                            name="roles"
+                                        />
+                                    </div>
+                                </div>
                                 <div className="mb-6">
                                     <label
                                         className="block text-sm font-medium text-gray-900 dark:text-white"

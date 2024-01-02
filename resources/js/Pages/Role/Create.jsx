@@ -1,11 +1,99 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Link, Head, usePage, useForm } from "@inertiajs/react";
-import "react-toastify/dist/ReactToastify.css";
+
 export default function Create({ auth }) {
+    const { permission_groups } = usePage().props;
+   
+    const [checkPermissionAll, setCheckPermissionAll] = useState(false);
+    const [permissions, setPermissions] = useState([]);
+
+    useEffect(() => {
+        setPermissions(permission_groups);
+    }, [permission_groups]);
+
+    const handleCheckPermissionAll = () => {
+        const updatedPermissions = permissions.map((group) => ({
+            ...group,
+            isChecked: !checkPermissionAll,
+            permissions: group.permissions.map((permission) => ({
+                ...permission,
+                isChecked: !checkPermissionAll,
+            })),
+        }));
+        // Update the permissions field in data with the new checked values
+        const newpermissions = updatedPermissions.map((g) => g.permissions).flat()
+        setData(
+            "permissions",
+            newpermissions.map((p) => p.name).flat()
+        );
+        setPermissions(updatedPermissions);
+        setCheckPermissionAll(!checkPermissionAll);
+    };
+    const handleCheckSubparentAll = (groupId) => {
+        const updatedPermissions = permissions.map((group) => {
+            if (group.id === groupId) {
+                return {
+                    ...group,
+                    permissions: group.permissions.map((permission) => ({
+                        ...permission,
+                        isChecked: !group.isChecked,
+                    })),
+                    isChecked: !group.isChecked,
+                };
+            }
+
+            return group;
+        });
+        // Update the permissions field in data with the new checked values
+        const newpermissions = updatedPermissions.map((g) => g.permissions).flat();
+        setData(
+            "permissions",
+            newpermissions.map((p) => p.name).flat()
+        );
+        setPermissions(updatedPermissions);
+        setCheckPermissionAll(
+            updatedPermissions.every((group) => group.isChecked)
+        );
+    };
+
+    const handleCheckboxChange = (groupId, permissionId) => {
+        const updatedPermissions = permissions.map((group) => {
+            if (group.id === groupId) {
+                const updatedGroup = {
+                    ...group,
+                    permissions: group.permissions.map((permission) => {
+                        if (permission.id === permissionId) {
+                            return {
+                                ...permission,
+                                isChecked: !permission.isChecked,
+                            };
+                        }
+                        return permission;
+                    }),
+                    isChecked: group.permissions.every(
+                        (permission) => permission.isChecked
+                    ),
+                };
+                return updatedGroup;
+            }
+
+            return group;
+        });
+        const newpermissions = updatedPermissions.map((g) => g.permissions).flat()
+        // Update the permissions field in data with the new checked values
+        setData(
+            "permissions",
+            newpermissions.map((p) => p.name).flat()
+        );
+        setPermissions(updatedPermissions);
+        setCheckPermissionAll(
+            updatedPermissions.every((group) => group.isChecked)
+        );
+    };
     const { data, setData, put, errors } = useForm({
         name: "",
-        email: "",
+        permissions: [],
     });
     function handleSubmit(e) {
         e.preventDefault();
@@ -15,6 +103,7 @@ export default function Create({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
+            permissions={auth.permissions}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
                     Roles
@@ -32,7 +121,10 @@ export default function Create({ auth }) {
                             <form name="createForm" onSubmit={handleSubmit}>
                                 <div className="flex flex-col">
                                     <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        <label
+                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                            htmlFor="name"
+                                        >
                                             Name
                                         </label>
                                         <input
@@ -50,7 +142,118 @@ export default function Create({ auth }) {
                                             {errors.name}
                                         </span>
                                     </div>
+                                    <div className="mb-4">
+                                        <label
+                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                            htmlFor="checkPermissionAll"
+                                        >
+                                            All
+                                            <input
+                                                type="checkbox"
+                                                checked={checkPermissionAll}
+                                                onChange={
+                                                    handleCheckPermissionAll
+                                                }
+                                                className="w-4 h-4 ml-2 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </label>
+                                    </div>
                                 </div>
+                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                    <tbody>
+                                        {permissions.map((group, i) => (
+                                            <tr
+                                                key={group.id}
+                                                className="bg-white dark:bg-gray-800 dark:border-gray-950"
+                                            >
+                                                <th
+                                                    scope="row"
+                                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                                >
+                                                    <h2 className="mt-2 mb-4 font-semibold text-gray-900 dark:text-white">
+                                                        {group.name}
+                                                        <input
+                                                            type="checkbox"
+                                                            value={
+                                                                group.isChecked
+                                                            }
+                                                            checked={
+                                                                group.isChecked
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckSubparentAll(
+                                                                    group.id
+                                                                )
+                                                            }
+                                                            className="w-4 h-4 ml-2 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                                                        />
+                                                    </h2>
+                                                </th>
+                                                <th>
+                                                    <ul className="mt-3 w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                                        {group?.permissions?.map(
+                                                            (permission, i) => (
+                                                                <li
+                                                                    className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+                                                                    key={
+                                                                        permission.id
+                                                                    }
+                                                                >
+                                                                    <div className="flex items-center ps-3">
+                                                                        <input
+                                                                            id={
+                                                                                "permission" +
+                                                                                permission.id
+                                                                            }
+                                                                            value={
+                                                                                permission.name
+                                                                            }
+                                                                            type="checkbox"
+                                                                            name="permissions[]"
+                                                                            checked={
+                                                                                permission.isChecked
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) => {
+                                                                                setData(
+                                                                                    "permissions",
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                );
+                                                                                handleCheckboxChange(
+                                                                                    group.id,
+                                                                                    permission.id
+                                                                                );
+                                                                            }}
+                                                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={
+                                                                                "permission" +
+                                                                                permission.id
+                                                                            }
+                                                                            key={
+                                                                                permission.id
+                                                                            }
+                                                                            className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                                                        >
+                                                                            {
+                                                                                permission.name
+                                                                            }
+                                                                        </label>
+                                                                    </div>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                </th>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
                                 <div className="mt-4">
                                     <button
                                         type="submit"

@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Link, Head, useForm } from "@inertiajs/react";
+import { Link, Head, useForm, usePage } from "@inertiajs/react";
+import Select from "react-select";
+
 export default function Create({ auth }) {
+    const { roles } = usePage().props;
+    
     const { data, setData, post, errors } = useForm({
         name: "",
         email: "",
         pic: "",
+        roles: []
     });
     const [file, setFile] = useState("http://localhost:8000/default.png");
     function handleChange(e) {
@@ -17,10 +22,16 @@ export default function Create({ auth }) {
         e.preventDefault();
         post(route("user.store"), data);
     }
+    
+    // Function triggered on selection
+    function handleSelect(data) {
+        setData('roles', data);
+    }
 
     return (
         <AuthenticatedLayout
             user={auth.user}
+            permissions={auth.permissions}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
                     Users
@@ -41,6 +52,28 @@ export default function Create({ auth }) {
                                 encType="multipart/form-data"
                             >
                                 <div className="flex flex-col">
+                                <div className="mb-0">
+                                        <label
+                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                            htmlFor="roles"
+                                        >
+                                            Roles
+                                        </label>
+                                        <div className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                                            >
+                                        <Select
+                                            options={roles}
+                                            placeholder="Select roles"
+                                            value={data.roles}
+                                            onChange={handleSelect}
+                                            isSearchable={true}
+                                            isMulti
+                                            name="roles"
+                                            
+                                        />
+
+                                        </div>
+                                    </div>
                                     <div className="mb-4">
                                         <label
                                             className="block text-sm font-medium text-gray-900 dark:text-white"
@@ -117,6 +150,7 @@ export default function Create({ auth }) {
                                             {errors.email}
                                         </span>
                                     </div>
+                                    
                                 </div>
                                 <div className="mt-4">
                                     <button

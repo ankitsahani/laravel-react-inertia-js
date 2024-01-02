@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.8",
         "mckenziearts/laravel-notify": "^2.4",
         "phpoffice/phpspreadsheet": "^1.29",
+        "spatie/laravel-permission": "^6.3",
         "tightenco/ziggy": "^1.0"
     },
     "require-dev": {

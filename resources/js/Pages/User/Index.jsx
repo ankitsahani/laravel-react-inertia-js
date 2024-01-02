@@ -16,10 +16,10 @@ const getInitials = (name) => {
     return initials.join("");
 };
 export default function Index({ auth }) {
-    const { users, exportusers } = usePage().props;
+    const { users, exportusers, can } = usePage().props;
+    console.log(auth);
     const perpage = useRef();
     const willDelete = useRef();
-
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
     const [query, setQuery] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -90,6 +90,7 @@ export default function Index({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
+            permissions={auth.permissions}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
                     Users
@@ -188,26 +189,30 @@ export default function Index({ auth }) {
                                 </h5>
                             </div>
                             <div className="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3">
-                                <Link
-                                    type="button"
-                                    href={route("user.create")}
-                                    className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-gray-950 hover:bg-gray-1000 focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-950 focus:outline-none dark:focus:ring-gray-800"
-                                >
-                                    <svg
-                                        className="h-3.5 w-3.5 mr-2"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        aria-hidden="true"
+                                {can.create_user ? (
+                                    <Link
+                                        type="button"
+                                        href={route("user.create")}
+                                        className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-gray-950 hover:bg-gray-1000 focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-950 focus:outline-none dark:focus:ring-gray-800"
                                     >
-                                        <path
-                                            clipRule="evenodd"
-                                            fillRule="evenodd"
-                                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                        />
-                                    </svg>
-                                    Add new user
-                                </Link>
+                                        <svg
+                                            className="h-3.5 w-3.5 mr-2"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                clipRule="evenodd"
+                                                fillRule="evenodd"
+                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                            />
+                                        </svg>
+                                        Add new user
+                                    </Link>
+                                ) : (
+                                    ""
+                                )}
 
                                 <CSVLink
                                     type="button"
@@ -323,27 +328,42 @@ export default function Index({ auth }) {
                                                 {user.email}
                                             </td>
                                             <td className="px-6 py-3">
-                                                {user?.role?.name}
+                                                {user.roles.map((role, i) => (
+                                                    <span
+                                                        key={role.name}
+                                                        className="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300"
+                                                    >
+                                                        {role.name}
+                                                    </span>
+                                                ))}
                                             </td>
                                             <td className="px-6 py-3">
-                                                <Link
-                                                    className="px-6 py-2 font-bold text-white bg-gray-950 rounded mx-3"
-                                                    href={route(
-                                                        "user.edit",
-                                                        user.id
-                                                    )}
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <DangerButton
-                                                    onClick={() =>
-                                                        confirmUserDeletion(
+                                                {can.edit_user ? (
+                                                    <Link
+                                                        className="px-6 py-2 font-bold text-white bg-gray-950 rounded mx-3"
+                                                        href={route(
+                                                            "user.edit",
                                                             user.id
-                                                        )
-                                                    }
-                                                >
-                                                    Delete
-                                                </DangerButton>
+                                                        )}
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                {can.delete_user ? (
+                                                    <DangerButton
+                                                        onClick={() =>
+                                                            confirmUserDeletion(
+                                                                user.id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </DangerButton>
+                                                ) : (
+                                                    ""
+                                                )}
                                             </td>
                                         </tr>
                                     ))

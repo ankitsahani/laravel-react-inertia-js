@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+ini_set('max_execution_time', 0);
+ini_set('memory_limit', '-1');
+
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -13,21 +17,41 @@ use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
 
 class UserController extends Controller
 {
+    public $user;
+
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->user = Auth::guard('web')->user();
+            return $next($request);
+        });
+    }
     public function index(Request $request)
     {
         $search = $request->input('search');
         $perpage = $request->input('perpage') ?? 10;
-        $data['users'] = User::query()->with('role')
+        $data['users'] = User::query()->with('roles')
             ->when($search, function ($query, $search) {
                 $query->where('name', 'like', '%' . $search . '%')
                     ->OrWhere('email', 'like', '%' . $search . '%');
             })
-            ->where('role_id', 2)
+            ->where('role_id', "!=", 1)
             ->latest()->paginate($perpage);
-        $data['exportusers'] = $this->exportData($search,$perpage);
+        $data['exportusers'] = $this->exportData($search, $perpage);
+        $data['can'] = [
+            'create_user' => $this->user->can('user.create'),
+            'view_user' => $this->user->can('user.view'),
+            'edit_user' => $this->user->can('user.edit'),
+            'delete_user' => $this->user->can('user.delete'),
+            'approve_user' => $this->user->can('user.approve'),
+        ];
         return Inertia::render('User/Index', $data);
     }
     /**
@@ -37,7 +61,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('User/Create');
+        $data['roles'] = Role::select('roles.name as value', 'roles.name as label')->get();
+        return Inertia::render('User/Create', $data);
     }
 
     /**
@@ -54,6 +79,7 @@ class UserController extends Controller
                 'max:255', 'unique:users'
             ],
             'pic' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            'roles.*' => ['required']
         ])->validate();
         if ($request->hasfile('pic')) {
             $file = $request->file('pic');
@@ -62,12 +88,15 @@ class UserController extends Controller
             $file->storeAs('public/users/', $filename);
             $pics = $filename;
         }
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'pic' => $pics,
             'password' => Hash::make('12345678'),
         ]);
+        if ($request->roles) {
+            $user->assignRole($request->roles);
+        }
         return redirect()->route('users.index')->with('success', 'User created successfully..!');
     }
 
@@ -86,10 +115,9 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::find($id);
-        return Inertia::render('User/Edit', [
-            'user' => $user
-        ]);
+        $data['user'] = User::with('roles')->find($id);
+        $data['rolesArr'] = Role::select('roles.name as value', 'roles.name as label')->get();
+        return Inertia::render('User/Edit', $data);
     }
 
     /**
@@ -105,7 +133,8 @@ class UserController extends Controller
                 'required', 'string', 'lowercase', 'email',
                 'max:255', 'unique:users,email,' . $id
             ],
-            'pic' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            'pic' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            'roles.*' => ['required']
         ])->validate();
         $user = User::find($id);
         if ($request->hasfile('pic')) {
@@ -123,6 +152,11 @@ class UserController extends Controller
             'pic' => $pics,
         ];
         $user->update($arr);
+
+        $user->roles()->detach();
+        if ($request->roles) {
+            $user->assignRole($request->roles);
+        }
         return redirect()->route('users.index')->with('success', 'User updated successfully..!');
     }
 
@@ -131,8 +165,7 @@ class UserController extends Controller
      */
     public function ExportExcel($customer_data)
     {
-        ini_set('max_execution_time', 0);
-        ini_set('memory_limit', '-1');
+
         try {
             $spreadSheet = new Spreadsheet();
             $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
@@ -152,23 +185,27 @@ class UserController extends Controller
      *This function loads the customer data from the database then converts it
      * into an Array that will be exported to Excel
      */
-    public function exportData($search,$perpage)
+    public function exportData($search, $perpage)
     {
-        $data = User::query()->with('role')
-        ->when($search, function ($query, $search) {
-            $query->where('name', 'like', '%' . $search . '%')
-                ->OrWhere('email', 'like', '%' . $search . '%');
-        })
-        ->where('role_id', 2)->take(5000)->get();
-        foreach ($data as $key => $data_item) {
-            $data_array[] = array(
-                'id' => $key + 1,
-                'name' => $data_item->name,
-                'email' => $data_item->email,
-                'role' => $data_item?->role?->name,
-                'created_at' => $data_item->created_at
-            );
+        $data = User::query()->with('roles')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->OrWhere('email', 'like', '%' . $search . '%');
+            })
+            ->where('role_id', "!=", 1)->take(599)->get();
+        $data_array = [];
+        if(count($data)){
+            foreach ($data as $key => $data_item) {
+                $data_array[] = array(
+                    'id' => $key + 1,
+                    'name' => $data_item->name,
+                    'email' => $data_item->email,
+                    'role' => $data_item?->role?->name,
+                    'created_at' => $data_item->created_at
+                );
+            }
         }
+        
         return $data_array;
     }
 }

@@ -4,7 +4,8 @@ import { usePage } from "@inertiajs/react";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 
-export default function Authenticated({ user, header, children }) {
+export default function Authenticated({ user, permissions, header, children }) {
+    
     const { flash } = usePage().props;
     useEffect(() => {
         // Check if there is a success flash message
@@ -19,7 +20,7 @@ export default function Authenticated({ user, header, children }) {
     return (
         <div className="w-full flex">
             {/* Navigation Bar */}
-            <NavigationBar></NavigationBar>
+            <NavigationBar permissions={permissions}></NavigationBar>
             <div className="relative flex flex-1 flex-col">
                 <Nav user={user}></Nav>
                 <Toaster position="top-right" reverseOrder={false} />

@@ -9,7 +9,7 @@ import { useRef, useState } from "react";
 import TextInput from "@/Components/TextInput";
 
 export default function Index({ auth }) {
-    const { roles } = usePage().props;
+    const { roles, can } = usePage().props;
     const perpage = useRef();
     const willDelete = useRef();
 
@@ -62,6 +62,7 @@ export default function Index({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
+            permissions={auth.permissions}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
                     Roles
@@ -120,7 +121,10 @@ export default function Index({ auth }) {
                                             value={query}
                                             onChange={(e) => {
                                                 setQuery(e.target.value);
-                                                handleSearch(e.target.value, perpage.current);
+                                                handleSearch(
+                                                    e.target.value,
+                                                    perpage.current
+                                                );
                                             }}
                                         />
                                     </div>
@@ -158,26 +162,30 @@ export default function Index({ auth }) {
                                 </h5>
                             </div>
                             <div className="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3">
-                                <Link
-                                    type="button"
-                                    href={route("role.create")}
-                                    className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-gray-950 hover:bg-gray-1000 focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-950 focus:outline-none dark:focus:ring-gray-800"
-                                >
-                                    <svg
-                                        className="h-3.5 w-3.5 mr-2"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        aria-hidden="true"
+                                {can.create_role ? (
+                                    <Link
+                                        type="button"
+                                        href={route("role.create")}
+                                        className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-gray-950 hover:bg-gray-1000 focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-950 focus:outline-none dark:focus:ring-gray-800"
                                     >
-                                        <path
-                                            clipRule="evenodd"
-                                            fillRule="evenodd"
-                                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                        />
-                                    </svg>
-                                    Add new role
-                                </Link>
+                                        <svg
+                                            className="h-3.5 w-3.5 mr-2"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                clipRule="evenodd"
+                                                fillRule="evenodd"
+                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                            />
+                                        </svg>
+                                        Add new role
+                                    </Link>
+                                ) : (
+                                    ""
+                                )}
 
                                 <button
                                     type="button"
@@ -211,6 +219,9 @@ export default function Index({ auth }) {
                                     <th scope="col" className="px-6 py-3">
                                         Name
                                     </th>
+                                    {/* <th scope="col" className="w-2 px-6 py-3">
+                                        Permissions
+                                    </th> */}
                                     <th scope="col" className="px-6 py-3">
                                         Created At
                                     </th>
@@ -239,30 +250,53 @@ export default function Index({ auth }) {
                                             >
                                                 {role.name}
                                             </th>
+
+                                            {/* <td
+                                                className="px-4 py-2"
+                                            >
+                                                {role?.permissions?.map(
+                                                    (permission, n) => (
+                                                        <span
+                                                            className="bg-primary-100 text-dark-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-primary-900 dark:text-primary-300"
+                                                            key={n}
+                                                        >
+                                                            {permission?.name}
+                                                        </span>
+                                                    )
+                                                )}
+                                            </td> */}
                                             <td className="px-6 py-3">
                                                 {moment(role.created_at).format(
                                                     "YYYY/MM/DD hh:mm:ss a"
                                                 )}
                                             </td>
                                             <td className="px-6 py-3">
-                                                <Link
-                                                    className="px-6 py-2 font-bold text-white bg-gray-950 rounded mx-3"
-                                                    href={route(
-                                                        "role.edit",
-                                                        role.id
-                                                    )}
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <DangerButton
-                                                    onClick={() =>
-                                                        confirmRoleDeletion(
+                                                {can.edit_role ? (
+                                                    <Link
+                                                        className="px-6 py-2 font-bold text-white bg-gray-950 rounded mx-3"
+                                                        href={route(
+                                                            "role.edit",
                                                             role.id
-                                                        )
-                                                    }
-                                                >
-                                                    Delete
-                                                </DangerButton>
+                                                        )}
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                {can.delete_role ? (
+                                                    <DangerButton
+                                                        onClick={() =>
+                                                            confirmRoleDeletion(
+                                                                role.id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </DangerButton>
+                                                ) : (
+                                                    ""
+                                                )}
                                             </td>
                                         </tr>
                                     ))

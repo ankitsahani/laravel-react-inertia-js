@@ -13,6 +13,9 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+
+        if (is_null($admin)) {
         User::create([
             'role_id' => 1,
             'name' => 'Administrator',
@@ -20,5 +23,6 @@ class AdminUserSeeder extends Seeder
             'pic' => 'default.png',
             'password' => bcrypt('123456'),
         ]);
+    }
     }
 }
