@@ -208,4 +208,13 @@ class UserController extends Controller
         
         return $data_array;
     }
+    public function search(Request $request)
+    {
+        $users = User::search($request->query('q'))->get();
+
+        return response()->json([
+            'query' => $request->query('q'),
+            'data' => $users,
+        ]);
+    }
 }

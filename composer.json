@@ -6,17 +6,23 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "algolia/algoliasearch-client-php": "^3.4",
         "guzzlehttp/guzzle": "^7.2",
+        "http-interop/http-factory-guzzle": "^1.2",
         "inertiajs/inertia-laravel": "^0.6.3",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.2",
+        "laravel/scout": "^10.6",
         "laravel/tinker": "^2.8",
         "mckenziearts/laravel-notify": "^2.4",
+        "meilisearch/meilisearch-php": "^1.5",
         "phpoffice/phpspreadsheet": "^1.29",
+        "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^6.3",
         "tightenco/ziggy": "^1.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.9",
         "fakerphp/faker": "^1.9.1",
         "laravel/breeze": "^1.26",
         "laravel/pint": "^1.0",
@@ -36,7 +42,10 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "app/Helpers/Helper.php"
+        ]
     },
     "scripts": {
         "post-autoload-dump": [

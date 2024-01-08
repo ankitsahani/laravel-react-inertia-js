@@ -33,10 +33,10 @@ const navLinks = [
         isPermission: "user.view",
     },
     {
-        name: "Transactions",
+        name: "Chat",
         icon: BarChart2,
-        link: "",
-        active: "",
+        link: route("chat.index"),
+        active: route().current("chat.index"),
         isPermission: "user.view",
     },
     {
@@ -117,7 +117,9 @@ export default function NavigationBar({ permissions }) {
                                 </span>
                             </div>
                         </Link>
-                    ) :""
+                    ) : (
+                        ""
+                    )
                 )}
             </div>
         </motion.div>
